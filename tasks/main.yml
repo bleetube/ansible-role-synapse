@@ -1,0 +1,35 @@
+---
+- name: Assert that this is a Debian-based distro.
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == 'Debian'
+    fail_msg: This role sets up matrix-org repositories which only support Debian-based distros.
+
+- name: Install synapse (Debian)
+  import_tasks: apt.yml
+
+- name: Ensure configuration directory
+  ansible.builtin.file:
+    path: /etc/matrix-synapse/conf.d
+    state: directory
+
+#- name: Ensure synapse is enabled on boot
+#  ansible.builtin.service:
+#    name: matrix-synapse
+#    enabled: true
+#    state: started
+#
+
+- name: Copy custom systemd.service override file.
+  ansible.builtin.copy:
+    src: matrix-synapse.service.d
+    dest: /etc/systemd/system/
+  register: systemd_service_override
+  tags: systemd
+  notify: Run systemctl daemon-reload
+
+- name: Configure the server_name
+  ansible.builtin.lineinfile:
+    path: /etc/matrix-synapse/conf.d/server_name.yaml
+    regexp: "^server_name:"
+    line: "server_name: {{ synapse_name }}"

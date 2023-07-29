@@ -1,0 +1,25 @@
+---
+- name: Add matrix-org apt repository key, which they provide in already de-armored form.
+  ansible.builtin.get_url:
+    url: "{{ matrix_repo_key_url }}"
+    dest: /usr/share/keyrings/matrix-org-archive-keyring.gpg
+    mode: '0644'
+
+- name: Ensure the repository is added with the relevant trusted GPG key
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/matrix-org.list
+    regexp: packages.matrix.org
+    line: "deb [arch=amd64 signed-by=/usr/share/keyrings/matrix-org-archive-keyring.gpg] https://packages.matrix.org/debian/ {{ ansible_distribution_release }} main"
+    create: true
+  register: matrix_repo
+
+- name: Update the apt repository cache
+  ansible.builtin.apt:
+    update_cache: yes
+  when: matrix_repo.changed
+
+- name: Install the synapse package
+  ansible.builtin.apt:
+    name: matrix-synapse-py3
+    state: latest
+
