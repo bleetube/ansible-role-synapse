@@ -23,9 +23,14 @@ synapse_domain: matrix.example.com
     - role: nginxinc.nginx_core.nginx
     - role: anxs.postgresql
     - role: bleetube.synapse
+    - role: bleetube.ntfy
   tasks:
     - import_tasks: nginx_conf.yml
 ```
+
+## Android Notifications
+
+The [ntfy role](https://github.com/bleetube/ansible-role-ntfy) is recommended. To enable your own self-hosted push notifications with Matrix, install [ntfy-android](https://ntfy.sh/) and set your ntfy url as default server in ntfy-android. Then restart your matrix app.
 
 ## Troubleshooting
 
